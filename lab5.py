@@ -1,67 +1,74 @@
-# import argparse
+import argparse
 import json
-from datetime import datetime
-
-# def create_parser():
-#     p = argparse.ArgumentParser()
-#     p.add_argument('act', type=int)
-#
-#     return p
 
 
-def init_db(transactions):
-    act = int(input("Выберите действие:"))
-    j = 0
+# from datetime import datetime
 
+
+def create_parser():
+    p = argparse.ArgumentParser()
+    p.add_argument('act', type=int)
+
+    return p
+
+
+def add_transaction(transactions, trans_numbers):
+    new_trans = ('transaction#' + str(len(trans_numbers) + 1))
+    print("Введите счёт списания,счет зачисления,дату," +
+          "время и сумму через запятую.")
+    while True:
+        try:
+            trans_val = list(map(str, input().split(",")))
+            transactions[new_trans] = {"write-off account": str(trans_val[0]), "credit account": str(trans_val[1]),
+                                       "date": str(trans_val[2]),
+                                       "time": str(trans_val[3]),
+                                       "amount": str(trans_val[4])}
+            print(transactions)
+            with open('c:/Users/lenovo/PycharmProjects/prog5/transactions.json', 'w') as write_file:
+                json.dump(transactions, write_file, indent=1)
+        except IndexError:
+            print("Введите корректные данные.")
+        else:
+            break
+
+
+def del_transaction(transactions, trans_numbers):
+    print("Транзакции,доступные для удаления:" + str(trans_numbers) + "\nВведите номер транзакции, который желаете удалить.")
+    while True:
+        try:
+            pop_trans = int(input())
+            transactions.pop("transaction#" + str(pop_trans))
+            print("Данные о транзакции успешно удалены.\nОбновлённая база данных:\n " + str(transactions))
+            with open('c:/Users/lenovo/PycharmProjects/prog5/transactions.json', 'w') as write_file:
+                json.dump(transactions, write_file, indent=1)
+        except KeyError:
+            print("Введите корректный номер транзакции.")
+            continue
+        except ValueError:
+            print("Введите корректный номер транзакции.")
+            continue
+        else:
+            break
+
+
+def main(act):
+    with open('c:/Users/lenovo/PycharmProjects/prog5/transactions.json', 'r') as read_file:
+        transactions = json.load(read_file)
+        read_file.close()
+    trans_numbers = [i for i in transactions.keys()]
     if act == 1:
-        j += 1
-        reading = int(input("Укажите счёт списания:"))
-        transactions['write-off account'].append(reading)
-        reading = int(input("Укажите счёт зачисления:"))
-        transactions['credit account'].append(reading)
-        date = input('Укажите дату: ')
-        date_str = str(datetime.strptime(date, '%d.%m.%Y'))
-        transactions['date'] += [date_str]
-        time = input("Укажите время:")
-        time_str = str(datetime.strptime(time, '%H:%M:%S').time())
-        transactions['time'] += [time_str]
-        reading = int(input("Укажите сумму:"))
-        transactions['amount'] += [reading]
-        print(transactions)
-        input()
-        with open('transactions.json', 'w') as f:
-            json.dump(transactions, f, indent=1)
-        with open('transactions.json', 'r') as f:
-            json_db = json.load(f)
-        print(json_db)
-        init_db(transactions)
+        add_transaction(transactions, trans_numbers)
     if act == 2:
-        j = int(input("Укажите номер транзакции для удаления:"))
-        for i in transactions.keys():
-            del(transactions[i][j])
-        with open('transactions.json', 'w') as f:
-            json.dump(transactions, f, indent=1)
-        with open('transactions.json', 'r') as f:
-            json_db = json.load(f)
-        print(json_db)
-        init_db(transactions)
-
-    if act == 3:
-        transactions['amount'] = sorted(transactions['amount'])
-        print(transactions)
-
+        del_transaction(transactions, trans_numbers)
+    # if act = 3:
+    #     sort_by_amount()
+    # if act == 4:
+    #     sort_by_time()
     if act == 5:
-        print("Завершение работы...")
+        print("Выход из программы...")
 
 
-def main():
-    transactions = {'write-off account': [], 'credit account': [], 'date': [],
-                    'time': [], 'amount': []}
-    init_db(transactions)
-
-
-main()
-# if __name__ == "__main__":
-#     parser = create_parser()
-#     namespace = parser.parse_args()
-#     init_db(namespace.act)
+if __name__ == "__main__":
+    parser = create_parser()
+    namespace = parser.parse_args()
+    main(namespace.act)
