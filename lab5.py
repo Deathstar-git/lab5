@@ -1,7 +1,5 @@
 import argparse
 import json
-
-
 # from datetime import datetime
 
 
@@ -12,60 +10,95 @@ def create_parser():
     return p
 
 
-def add_transaction(transactions, trans_numbers):
-    new_trans = ('transaction#' + str(len(trans_numbers) + 1))
-    print("Введите счёт списания,счет зачисления,дату," +
-          "время и сумму через запятую.")
-    while True:
-        try:
-            trans_val = list(map(str, input().split(",")))
-            transactions[new_trans] = {"write-off account": str(trans_val[0]), "credit account": str(trans_val[1]),
-                                       "date": str(trans_val[2]),
-                                       "time": str(trans_val[3]),
-                                       "amount": str(trans_val[4])}
-            print(transactions)
-            with open('c:/Users/lenovo/PycharmProjects/prog5/transactions.json', 'w') as write_file:
-                json.dump(transactions, write_file, indent=1)
-        except IndexError:
-            print("Введите корректные данные.")
-        else:
-            break
+def show_db(transactions):  # вывод базы данных
+    print('   Счет списания ', 'Счет зачисления', 'Дата', 'Время ', 'Сумма ')
+    for i in range(len(transactions)):
+        print(i + 1, ' - ', transactions[i])
 
 
-def del_transaction(transactions, trans_numbers):
-    print("Транзакции,доступные для удаления:" + str(trans_numbers) + "\nВведите номер транзакции, который желаете удалить.")
+def add_transaction(transactions):  # Добавление транзакции
+    new_trans = []
     while True:
-        try:
-            pop_trans = int(input())
-            transactions.pop("transaction#" + str(pop_trans))
-            print("Данные о транзакции успешно удалены.\nОбновлённая база данных:\n " + str(transactions))
-            with open('c:/Users/lenovo/PycharmProjects/prog5/transactions.json', 'w') as write_file:
-                json.dump(transactions, write_file, indent=1)
-        except KeyError:
-            print("Введите корректный номер транзакции.")
+        read = input("Введите счет списания:")
+        if len(read) != 6:
+            print("Введите 6-ти значный счёт!")
             continue
+        else:
+            new_trans.append(read)
+            break
+    while True:
+        read = input("Введите счёт зачисления:")
+        if len(read) != 6:
+            print("Введите 6-ти значный счёт!")
+            continue
+        else:
+            new_trans.append(read)
+            break
+    read = input("Введите дату:")
+    new_trans.append(read)
+    read = input("Введите время:")
+    new_trans.append(read)
+    while True:
+        try:
+            read = int(input("Введите сумму:"))
+            new_trans.append(read)
         except ValueError:
-            print("Введите корректный номер транзакции.")
-            continue
+            print("Введите корректную сумму.")
         else:
             break
+    transactions.append(new_trans)
+    return transactions
+
+
+def del_transaction(transactions):  # удаление трансакции
+    nom = int(input('Введите номер транзакции, которую хотите удалить:'))
+    transactions.pop(nom - 1)
+    return transactions
+
+
+def sort_by_amount(transactions):  # фильтрование по сумме (по убыванию)
+    for i in range(len(transactions)):
+        for j in range(len(transactions)):
+            if transactions[j][4] < transactions[i][4]:
+                transactions[j], transactions[i] = transactions[i], transactions[j]
+    return transactions
+
+
+def sort_by_time(transactions):
+    times = []
+    for i in range(len(transactions)):
+        time = transactions[i][3].split(':')
+        times.append(time)
+    for i in range(len(times) - 1):
+        for j in range(len(times) - i - 1):
+            if times[j][0] < times[j + 1][0]:
+                times[j], times[j + 1] = times[j + 1], times[j]
+    for n in range(len(times) - 1):
+        for m in range(len(times) - n - 1):
+            if times[m][0] == times[m + 1][0]:
+                if times[m][1] < times[m + 1][1]:
+                    times[m][1], times[m + 1][1] = times[m + 1][1], times[m][1]
+                    break
+    print(times)
 
 
 def main(act):
-    with open('c:/Users/lenovo/PycharmProjects/prog5/transactions.json', 'r') as read_file:
-        transactions = json.load(read_file)
-        read_file.close()
-    trans_numbers = [i for i in transactions.keys()]
+    with open('C:/Users/lenovo/PycharmProjects/prog5/transactions.json', "r") as f:
+        transactions = json.load(f)
     if act == 1:
-        add_transaction(transactions, trans_numbers)
+        add_transaction(transactions)
     if act == 2:
-        del_transaction(transactions, trans_numbers)
-    # if act = 3:
-    #     sort_by_amount()
-    # if act == 4:
-    #     sort_by_time()
+        del_transaction(transactions)
+    if act == 3:
+        sort_by_amount(transactions)
+    if act == 4:
+        sort_by_time(transactions)
     if act == 5:
+        show_db(transactions)
+    if act == 6:
         print("Выход из программы...")
+    with open('C:/Users/lenovo/PycharmProjects/prog5/transactions.json', "w") as f:
+        json.dump(transactions, f, indent=1)
 
 
 if __name__ == "__main__":
