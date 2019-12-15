@@ -4,7 +4,7 @@ import json
 
 def create_parser():
     p = argparse.ArgumentParser()
-    p.add_argument('act', type=int)
+    p.add_argument('act', type=int)  # Ввод номера нужного действия для дальнейшей работы
 
     return p
 
@@ -12,7 +12,7 @@ def create_parser():
 def show_db(transactions):  # вывод базы данных
     print('   Счет списания ', 'Счет зачисления', 'Дата', 'Время ', 'Сумма ')
     for i in range(len(transactions)):
-        print(i + 1, ' - ', transactions[i])
+        print(i + 1, ':', transactions[i])
 
 
 def add_transaction(transactions):  # Добавление транзакции
@@ -49,7 +49,7 @@ def add_transaction(transactions):  # Добавление транзакции
     return transactions
 
 
-def del_transaction(transactions):  # удаление трансакции
+def del_transaction(transactions):  # удаление транзакции
     nom = int(input('Введите номер транзакции, которую хотите удалить:'))
     transactions.pop(nom - 1)
     return transactions
@@ -65,17 +65,17 @@ def sort_by_amount(transactions):  # фильтрование по сумме (�
 
 def sort_by_time(transactions):
     times = []
-    for i in range(len(transactions)):
+    for i in range(len(transactions)):  # создание нового списка с часами и минутами
         time = transactions[i][3].split(':')
         times.append(time)
-    for i in range(len(times) - 1):
+    for i in range(len(times) - 1):  # Сортировка пузырьком (часы)
         for j in range(len(times) - i - 1):
             if times[j][0] < times[j + 1][0]:
                 times[j], times[j + 1] = times[j + 1], times[j]
-    for n in range(len(times) - 1):
+    for n in range(len(times) - 1):  # Сортировка пузырьком (минуты)
         for m in range(len(times) - n - 1):
-            if times[m][0] == times[m + 1][0]:
-                if times[m][1] < times[m + 1][1]:
+            if times[m][0] == times[m + 1][0]:  # Если часы равны,то срабатывает сортировка
+                if times[m][1] < times[m + 1][1]:  # По минутам
                     times[m][1], times[m + 1][1] = times[m + 1][1], times[m][1]
                     break
     print(times)
@@ -84,6 +84,7 @@ def sort_by_time(transactions):
 def main(act):
     with open('C:/Users/lenovo/PycharmProjects/prog5/transactions.json', "r") as f:
         transactions = json.load(f)
+    # Вызов конкретной функции в зависимости от выбранного действия
     if act == 1:
         add_transaction(transactions)
     if act == 2:
